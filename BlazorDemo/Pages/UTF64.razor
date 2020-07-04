@@ -1,0 +1,115 @@
+﻿@page "/Data/Codec"
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+@using BlazorDemo.Models
+
+@inject ICodecData _db
+@inject BlazorDemo.Data.Codec CodecProcess
+
+<h1>UTF8 Encoding and Decoding</h1>
+
+<h4>New String Conversion</h4>
+<EditForm Model="@newCodec" OnValidSubmit="@EncodeString">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="input-group mb-3">
+        <InputText id="encodeString" class="form-control" placeholder="Enter string to be encoded" @bind-Value="newCodec.EncodeString" />
+        <div class="input-group-prepend">
+            <button type="submit" class="btn btn-outline-dark">Encode</button>
+        </div>
+    </div>
+</EditForm>
+
+<EditForm Model="@newCodec" OnValidSubmit="@DecodeString">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="input-group mb-3">
+        <InputText id="decodeString" class="form-control" placeholder="Enter string to be encoded" @bind-Value="newCodec.DecodeString" />
+        <div class="input-group-prepend">
+            <button type="submit" class="btn btn-outline-dark">Decode</button>
+        </div>
+    </div>
+</EditForm>
+
+<h4>Current String Conversion</h4>
+
+@if (codecs is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Encode String</th>
+                <th>Decode String</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var codec in codecs)
+            { 
+            <tr>
+                <td>@codec.EncodeString</td>
+                <td>@codec.DecodeString</td>
+                <td>@codec.Status</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Codec> codecs;
+    private DisplayCodec newCodec = new DisplayCodec();
+    private bool encodeFlag;
+
+    protected override async Task OnInitializedAsync()
+    {
+        codecs = await _db.GetCodecs();
+    }
+
+    private async Task InsertCodec()
+    {
+        if (encodeFlag)
+        {
+            // Encode string
+            newCodec.DecodeString = CodecProcess.encode(newCodec.EncodeString);
+            newCodec.Status = "Encoding";
+        }
+        else
+        {
+            // Encode string
+            newCodec.EncodeString = CodecProcess.decode(newCodec.DecodeString);
+            newCodec.Status = "Decoding";
+        }
+
+        // Insert new model to database
+        Codec c = new Codec
+        {
+            EncodeString = newCodec.EncodeString,
+            DecodeString = newCodec.DecodeString,
+            Status = newCodec.Status
+        };
+
+        await _db.InsertCodec(c);
+
+        codecs.Add(c);
+
+        newCodec = new DisplayCodec();
+    }
+
+    private async Task EncodeString()
+    {
+        encodeFlag = true;
+        await InsertCodec();
+    }
+
+    private async Task DecodeString()
+    {
+        encodeFlag = false;
+        await InsertCodec();
+    }
+}
