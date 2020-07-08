@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "signalr1": {
+      "restored": true,
+      "restoreTime": "2020-07-08T04:52:23.2707873Z"
+    },
+    "mssql1": {
+      "restored": true,
+      "restoreTime": "2020-07-08T04:46:06.1111424Z"
+    }
+  },
+  "parameters": {
+    "resourceGroup": {
+      "Type": "resourceGroup",
+      "Value": "BlazorStringDemo"
+    },
+    "subscriptionId": {
+      "Type": "subscription",
+      "Value": "1f9ec095-a3ce-40c5-aa69-ed6ef6689359"
+    }
+  }
+}
